@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/malongl1/public_html/churchvest/churchvest/
+    - /bin/cp -R * $DEPLOYPATH
+    - php /home/malongl1/public_html/churchvest/churchvest/artisan migrate
+#    - php /home/malongl1/public_html/churchvest/churchvest/artisan db:seed
