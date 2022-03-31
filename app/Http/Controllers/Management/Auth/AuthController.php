@@ -36,7 +36,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'status' => false,
+            'status' => $role_id==1? true:false,
             'role_id'=> $role_id,
             'password' => Hash::make($request->password)
         ]);
@@ -80,5 +80,10 @@ class AuthController extends Controller
 
     public function profile(){
         return new UserResource(auth()->user());
+    }
+    public function logout(){
+        auth()->logout();
+        return response()->json(['message' => 'User successfully signed out']);
+
     }
 }

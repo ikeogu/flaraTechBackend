@@ -9,6 +9,7 @@ use App\Http\Resources\ProfileResource;
 use App\Http\Resources\RadioResource;
 use App\Http\Resources\TrackList;
 use App\Models\Profile;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -83,6 +84,15 @@ class UserController extends Controller
             return new RadioResource($user);
        }
     }
-    
+    public function list_of_radio_stations(){
+        $stations = User::where('role_id',3)->with('personal_details')->get();
+        return RadioResource::collection($stations);
+    }
+    public function list_of_artisits()
+    {
+        $stations = User::where('role_id', 2)->with('personal_details')->get();
+        return ArtisteResource::collection($stations);
+    }
+
 
 }

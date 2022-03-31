@@ -267,4 +267,10 @@ class MediaController extends Controller
     {
         return TrackList::collection(auth()->user()->media);
     }
+    public function accept_track($id){
+
+    }
+    public function reject_track($id)
+    {
+    }
 }

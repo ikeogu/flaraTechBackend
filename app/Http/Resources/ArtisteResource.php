@@ -17,7 +17,12 @@ class ArtisteResource extends JsonResource
     {
 
         return [
-            'total_songs' => Media::where('user_id',$this->id)->count(),
+            'id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->email,
+            'status' => $this->status,
+            'profile' => $this->personal_details,
+            'total_songs' => Media::where('user_id',$this->id)->count()
 
         ];
     }

@@ -15,12 +15,13 @@ class ProfileResource extends JsonResource
     public function toArray($request)
     {
         return [
-            
+
             'record_label' =>$this->record_label,
             'stage_name' =>$this->stage_name,
             'twitter_handle' => $this->twitter_handle,
             'instagram' => $this->instagram,
             'phone_number' => $this->phone_number,
+            'status' => $this->user->status,
 
         ];
     }

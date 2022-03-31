@@ -21,50 +21,10 @@ use Illuminate\Support\Str;
 */
 
 Route::group(['namespace' => 'App\Http\Controllers'], function () {
-    /*Password Reset Routes*/
-    Route::post('/forgot-password', function (Request $request) {
-        $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        return $status === Password::RESET_LINK_SENT
-            ? response()->json(['status' => 'success', 'message' => "Password reset link sent successfully"])
-            : response()->json(['status' => 'failed', 'message' => __($status)], 403);
-    })->middleware('guest')->name('password.email');
-
-    Route::get('/reset-password/{token}', function ($token) {
-    })->middleware('guest')->name('password.reset');
-
-    Route::post('/reset-password', function (Request $request) {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
-        ]);
-
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) use ($request) {
-                $user->forceFill([
-                    'password' => Hash::make($password)
-                ])->setRememberToken(Str::random(60));
-
-                $user->save();
-
-                event(new PasswordReset($user));
-            }
-        );
-
-        return $status == Password::PASSWORD_RESET
-            ? response()->json(['status' => 'success', 'message' => "Password reset successfully"])
-            : response()->json(['status' => 'failed', 'message' => __($status)], 403);
-    })->middleware('guest')->name('password.update');
-    /*End Password Reset Routes*/
 
     /*Management Routes*/
-    Route::group(['prefix' => 'management', 'namespace' => 'Management' ], function () {
+    Route::group(['prefix' => 'management', 'namespace' => 'Management'], function () {
         /*Onboarding Routes*/
 
         Route::post('/register_admin', 'Auth\AuthController@registerAdmin');
@@ -72,8 +32,48 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::post('/register_radio', 'Auth\AuthController@registerRadio');
         Route::post('/login', 'Auth\AuthController@login');
 
+        /*Password Reset Routes*/
+        Route::post('forgot-password', function (Request $request) {
 
+            $request->validate(['email' => 'required|email']);
 
+            $status = Password::sendResetLink(
+                $request->only('email')
+            );
+
+            return $status === Password::RESET_LINK_SENT
+                ? response()->json(['status' => 'success', 'message' => "Password reset link sent successfully"])
+                : response()->json(['status' => 'failed', 'message' => __($status)], 403);
+        })->middleware('guest')->name('password.email');
+
+        Route::get('reset-password/{token}', function ($token) {
+        })->middleware('guest')->name('password.reset');
+
+        Route::post('reset-password', function (Request $request) {
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|min:8|confirmed',
+            ]);
+
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user, $password) use ($request) {
+                    $user->forceFill([
+                        'password' => Hash::make($password)
+                    ])->setRememberToken(Str::random(60));
+
+                    $user->save();
+
+                    event(new PasswordReset($user));
+                }
+            );
+
+            return $status == Password::PASSWORD_RESET
+                ? response()->json(['status' => 'success', 'message' => "Password reset successfully"])
+                : response()->json(['status' => 'failed', 'message' => __($status)], 403);
+        })->middleware('guest')->name('password.update');
+        /*End Password Reset Routes*/
         /*End Onboarding Routes*/
 
 
@@ -83,6 +83,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
             // Profile Routes
             Route::get('/profile', 'Auth\AuthController@profile');
             Route::post('/profile_update', 'User\UserController@update_user');
+            Route::get('list_of_radio_stations', 'User\UserController@list_of_radio_stations');
+            Route::get('list_of_radio_artists', 'User\UserController@ist_of_artisits');
+            Route::post('logout', 'Auth\AuthController@logout');
             /*Email Verification Routes*/
             Route::group(['prefix' => 'email', 'as' => 'verification.'], function () {
                 Route::get('/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
@@ -101,7 +104,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
                 })->middleware(['throttle:6,1'])->name('send');
             });
             //Media routes
-            Route::group(['prefix' => 'media', 'namespace' => 'Media', ], function () {
+            Route::group(['prefix' => 'media', 'namespace' => 'Media',], function () {
                 // Route::get('{type}', 'MediaController@get_all_media');
                 Route::post('upload_media', 'MediaController@upload_media');
                 Route::get('artiste_track_list', 'MediaController@myPlayList');
@@ -116,11 +119,11 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
             });
             // Dashboard routes
             Route::get('dashboard', 'User\UserController@Dashboard');
-
+            // payment routes
+            // Laravel 8
+            Route::post('/pay', [App\Http\Controllers\PaymentController::class, 'redirectToGateway'])->name('pay');
         });
         /*End Authenticated Routes*/
     });
     /*End Management Routes*/
-
 });
-

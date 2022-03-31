@@ -16,6 +16,11 @@ class RadioResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id'=> $this->id,
+            'name'=> $this->name,
+            'email' => $this->email,
+            'status' => $this->status,
+            'profile'=> $this->personal_details,
             'total_songs_approved' => Media::where('status','=','approved')->count(),
         ];
     }

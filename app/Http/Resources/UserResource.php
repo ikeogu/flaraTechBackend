@@ -22,8 +22,9 @@ class UserResource extends JsonResource
             'middle_name' => implode(" ", array_slice($names, 2)) ?? "",
             'email' => $this->email,
             'email_verified_at' => $this->email_verified_at,
-            'phone' => $this->phone,
 
+             'role_id' =>$this->role_id,
+             'status'=>$this->status,
             'details' => [
                 'personal' => $this->personal_details ? new ProfileResource($this->personal_details) : (object)[],
             ],
