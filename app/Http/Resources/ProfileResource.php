@@ -21,7 +21,12 @@ class ProfileResource extends JsonResource
             'twitter_handle' => $this->twitter_handle,
             'instagram' => $this->instagram,
             'phone_number' => $this->phone_number,
+            'image' => '/storage/images/'.$this->image,
+            'account_number'=>$this->account_number,
+            'account_name'=>$this->account_name,
+            'bank'=>$this->bank,
             'status' => $this->user->status,
+
 
         ];
     }

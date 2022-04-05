@@ -19,18 +19,9 @@ class MediaController extends Controller
 {
     //
 
-    public function get_all_media($slug, $type)
+    public function get_all_media()
     {
-        $church = Church::get_church($slug);
-        $media = $church->media()->where('type', $type)->with('account');
-        if ($type == 'track') {
-            $media = $media->with('track');
-        } elseif ($type === 'album') {
-            $media = $media->with('tracks');
-        }
-
-        $media = $media->get();
-
+        $media = Media::latest()->get();
         return MediaResource::collection($media);
     }
 
@@ -53,33 +44,24 @@ class MediaController extends Controller
     {
 
         $user = auth()->user();
-        // $rules = [
-        //     'type' => 'required|in:' . implode(',', Media::$types),
-        //     'title' => [
-        //         'required',
-        //         'string',
-        //         Rule::unique('media', 'title')->where('user_id', $user->id)
-        //     ],
+        $rules = [
+            'type' => 'required|in:' . implode(',', Media::$types),
+            'title' => [
+                'required',
+                'string',
+                Rule::unique('media', 'title')->where('user_id', $user->id)
+            ],
 
-        //     'price' => 'nullable|required_with:account_id|numeric',
-        //     'description' => 'nullable|string'
-        // ];
-        // $request->validate($rules);
-        // if ($request->type === 'track') {
-        //     $rules = [
-        //         'track' => 'required|file|mimes:mp3',
-        //     ];
-        // } elseif ($request->type === 'album') {
-        //     $rules = [
-        //         'tracks' => 'required|array',
-        //         'tracks.*' => 'required|file|mimes:mp3'
-        //     ];
-        // } else {
-        //     $rules = [
-        //         'upload' => 'required|file|mimes:pdf,mp3',
-        //     ];
-        // }
-        // $request->validate($rules);
+            'price' => 'nullable|numeric',
+            'description' => 'nullable|string'
+        ];
+        $request->validate($rules);
+        if ($request->type === 'track') {
+            $rules = [
+                'track' => 'required|file|mimes:mp3',
+            ];
+        }
+        $request->validate($rules);
 
         $media = $user->media()->create([
             'type' => $request->type,
@@ -98,21 +80,8 @@ class MediaController extends Controller
                 static::add_track_to_media($media, $file, $file_name, $path);
                 $media->load('upload');
             }
-        } elseif ($request->type === 'album') {
-            if ($request->hasFile('tracks')) {
-                $path = $user->id . '/uploads/media/' . $media->type;
-                foreach ($request->file('tracks') as $file) {
-                    $file_name = $file->getFilename() . '_' . time() . '_.mp3';
-                    static::add_track_to_media($media, $file, $file_name, $path);
-                }
-                $path .= '/' . Str::slug($media->title) . '_' . time() . '_.zip';
-                static::zip_media($media, storage_path('app/' . $path));
-                $media->update([
-                    'upload' => $path
-                ]);
-                $media->load('tracks');
-            }
         }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Media uploaded successfully',
@@ -157,9 +126,9 @@ class MediaController extends Controller
         ], 403);
     }
 
-    public function delete_media(Request $request, $userId)
+    public function delete_media(Request $request)
     {
-        $user = User::findorFail($userId);
+        $user = auth()->user();
         $request->validate([
             'media_id' => [
                 'required',
@@ -250,27 +219,33 @@ class MediaController extends Controller
         ]);
     }
 
-    public static function zip_media($media, $path)
-    {
-        $zip = new \ZipArchive();
-        if ($zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE)) {
-            foreach ($media->tracks as $track) {
-                $file = $track->path;
-                $file_name = explode('/album/', $track->path)[1];
-                $zip->addFile(storage_path('app/' . $file), $file_name);
-            }
-            $zip->close();
-        }
-    }
+
 
     public function myPlayList()
     {
         return TrackList::collection(auth()->user()->media);
     }
     public function accept_track($id){
-
+      $media = Media::find($id);
+      $media->status = 'promoting';
+      $media->save();
     }
     public function reject_track($id)
     {
+        $media = Media::find($id);
+        $media->status = 'rejected';
+        $media->save();
+
+    }
+    public function promote_track($id)
+    {
+        $media = Media::find($id);
+        $media->status = 'promoted';
+        $media->save();
+    }
+    public function promoted_tracks(){
+        $media = Media::where('status','promoted')->latest()->get();
+        return MediaResource::collection($media);
+
     }
 }

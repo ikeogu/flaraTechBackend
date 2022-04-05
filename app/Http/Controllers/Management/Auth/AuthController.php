@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Management\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Mail\RadioStation;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Profile;
+use App\Models\Radio;
+use Illuminate\Support\Facades\Mail;
+use Str;
 
 class AuthController extends Controller
 {
@@ -24,7 +28,7 @@ class AuthController extends Controller
     {
         return $this->register($request, 3);
     }
-    public function register($request,$role_id)
+    public function register($request, $role_id)
     {
         // dd($request->all());
         $request->validate([
@@ -36,13 +40,21 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'status' => $role_id==1? true:false,
-            'role_id'=> $role_id,
+            'status' => $role_id == 1 ? true : false,
+            'role_id' => $role_id,
             'password' => Hash::make($request->password)
         ]);
-        Profile::updateOrCreate([
-            'user_id' => $user->id
-        ]);
+        if ($role_id == 3) {
+            Radio::updateOrCreate([
+                'user_id' => $user->id,
+                'name' => $request->name,
+            ]);
+        } else {
+            Profile::updateOrCreate([
+                'user_id' => $user->id
+            ]);
+        }
+
 
         $token = auth()->login($user);
         event(new Registered($user));
@@ -78,12 +90,60 @@ class AuthController extends Controller
         ]);
     }
 
-    public function profile(){
+    public function profile()
+    {
         return new UserResource(auth()->user());
     }
-    public function logout(){
+    public function logout()
+    {
         auth()->logout();
         return response()->json(['message' => 'User successfully signed out']);
+    }
+    public function add_radio_station(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|unique:users,email,except,id',
+            'name' => 'required|string',
+            'price' => 'numeric'
+        ]);
+        $pass = Str::random(8);
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($pass),
+            'status' => 0,
+            'role_id' => 3
+        ]);
+        $filename = '';
+        if ($request->hasFile('image')) {
+            $filename = $request->image->getClientOriginalName();
+            $request->image->storeAs('images', $filename, 'public');
+        }
+        Radio::create([
+            'user_id' => $user->id,
+            'price' => $request->price,
+            'acct_bal' => 0,
+            'state' => $request->state,
+            'frequency' => $request->frequency,
+            'logo' => $filename
 
+        ]);
+        $data = [
+            'subject' => 'Radio Station Login Details',
+            'message' => [
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => $pass
+            ],
+            'from' => [
+                'sender' => 'support@craxet.com',
+                'name' => 'Flaret Admin'
+            ]
+        ];
+        Mail::to($request->email)->send(new RadioStation($data));
+        $token = auth()->login($user);
+        event(new Registered($user));
+
+        return $this->respondWithToken($token);
     }
 }

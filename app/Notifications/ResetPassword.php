@@ -75,7 +75,7 @@ class ResetPassword extends Notification
                 'email' => $notifiable->getEmailForPasswordReset(),
             ], false));
 
-            $url = Str::replaceFirst(\config('app.url') . '/api', \config('app.frontend_url') . '/onboarding', $url);
+            $url = Str::replaceFirst(\config('app.url') . '/api', \config('app.frontend_url') . '/auth', $url);
         }
 
         return (new MailMessage)

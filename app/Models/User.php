@@ -85,9 +85,10 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail, CanRe
                 ]
             );
 
-//            return config('app.url') . '-----' . config('app.frontend_url') . '-----' . $url;
+        $n = \config('app.url') . '/api/management';
+        $m = \config('app.frontend_url') . '/auth';
 
-            return Str::replaceFirst(\config('app.url') . '/api/management', \config('app.frontend_url') . '/onboarding/api', $url);
+            return Str::replaceFirst($n, $m, $url);
         });
         $this->notify(new VerifyEmail());
     }
@@ -111,6 +112,10 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail, CanRe
     public function personal_details()
     {
         return $this->hasOne(Profile::class, 'user_id');
+    }
+    public function radio_details()
+    {
+        return $this->hasOne(Radio::class, 'user_id');
     }
 
     public function belongs_to_church($church)

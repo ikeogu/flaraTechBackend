@@ -84,8 +84,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
             Route::get('/profile', 'Auth\AuthController@profile');
             Route::post('/profile_update', 'User\UserController@update_user');
             Route::get('list_of_radio_stations', 'User\UserController@list_of_radio_stations');
-            Route::get('list_of_radio_artists', 'User\UserController@ist_of_artisits');
+            Route::get('list_of_artists', 'User\UserController@list_of_artists');
             Route::post('logout', 'Auth\AuthController@logout');
+            Route::post('add_radio_station', 'Auth\AuthController@add_radio_station');
             /*Email Verification Routes*/
             Route::group(['prefix' => 'email', 'as' => 'verification.'], function () {
                 Route::get('/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
@@ -108,11 +109,18 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
                 // Route::get('{type}', 'MediaController@get_all_media');
                 Route::post('upload_media', 'MediaController@upload_media');
                 Route::get('artiste_track_list', 'MediaController@myPlayList');
-                Route::post('{media}/download', 'MediaController@download_media');
+                Route::post('{media}/download/{media_id}', 'MediaController@download_media');
                 Route::post('{media}/update', 'MediaController@update_media');
                 Route::post('delete', 'MediaController@delete_media');
+                Route::get('get_all_track', 'MediaController@get_all_media');
+                Route::get('promoting_track/{id}','MediaController@accept_track');
+                Route::get('reject_track/{id}', 'MediaController@reject_track');
+                Route::get('promote_track/{id}', 'MediaController@promote_track');
+                Route::get('promoted_tracks', 'MediaController@promoted_tracks');
+
                 Route::group(['prefix' => 'trash'], function () {
                     Route::get('{type}', 'MediaController@get_all_trash');
+
                     Route::post('restore', 'MediaController@restore_trash');
                     Route::post('delete', 'MediaController@delete_trash');
                 });

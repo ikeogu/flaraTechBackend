@@ -20,8 +20,10 @@ class RadioResource extends JsonResource
             'name'=> $this->name,
             'email' => $this->email,
             'status' => $this->status,
-            'profile'=> $this->personal_details,
-            'total_songs_approved' => Media::where('status','=','approved')->count(),
+            'profile'=> $this->radio_details,
+            'total_songs_approved' => Media::where('status','=','promoting')->count(),
+            'total_songs_rejected' => Media::where('status', '=', 'rejected')->count(),
+            'total_songs_promoted' => Media::where('status', '=', 'promoted')->count(),
         ];
     }
 }

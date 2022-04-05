@@ -5,20 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Profile extends Model
+class Radio extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'record_label',
-        'stage_name',
-        'twitter_handle',
-        'instagram',
-        'phone_number',
-        'user_id',
-        'image',
-        'account_number',
-        'acount_name',
-        'bank'
+    
+        'logo',
+        'price',
+        'state',
+        'frequency',
+        'acct_bal',
+        'user_id'
     ];
     public function user()
     {
