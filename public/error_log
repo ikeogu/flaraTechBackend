@@ -1,0 +1,4 @@
+[08-Apr-2022 02:02:55 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to undefined function symlink() in /home/appgidic/public_html/flaretech/flaretechbackend/public/symlink.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/appgidic/public_html/flaretech/flaretechbackend/public/symlink.php on line 8

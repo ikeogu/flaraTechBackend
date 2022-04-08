@@ -16,7 +16,8 @@ class TrackResource extends JsonResource
     {
         return [
             'id',
-            'duration' => $this->duration
+            'duration' => $this->duration,
+            'path'=> $this->path
         ];
 
     }

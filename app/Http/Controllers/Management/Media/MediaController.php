@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Management\Media;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PaystackController;
 use App\Http\Resources\MediaResource;
 use App\Http\Resources\TrackList;
 use App\Models\Church;
 use App\Models\Media;
+use App\Models\Payment;
+use App\Models\Radio;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -72,17 +75,16 @@ class MediaController extends Controller
             'status' => 'pending'
         ]);
 
-        if ($request->type === 'track') {
-            if ($request->hasFile('upload') && $request->file('upload')->isValid()) {
-                $file = $request->file('upload');
-                $file_name = Str::slug($media->title) . '.mp3';
-                $path = $user->id . '/uploads/media/' . $media->type;
-                static::add_track_to_media($media, $file, $file_name, $path);
-                $media->load('upload');
-            }
-        }
 
-        return response()->json([
+            if ($request->hasFile('track')) {
+                $file = $request->file('track');
+                $file_name = Str::slug($media->title) . '.mp3';
+                $path = 'flaretech_uploads/uploads/media/' . $media->type;
+                static::add_track_to_media($media, $file, $file_name, $path);
+                $media->load('track');
+            }
+
+         return response()->json([
             'status' => 'success',
             'message' => 'Media uploaded successfully',
             'data' => new MediaResource($media)
@@ -91,7 +93,7 @@ class MediaController extends Controller
 
     public static function add_track_to_media($media, $file, $file_name, $path)
     {
-        $path = $file->storeAs($path, $file_name);
+        $path = $file->move($path, $file_name);
         $duration = 0;
         try {
             $audio = new Mp3Info($path, true);
@@ -219,7 +221,57 @@ class MediaController extends Controller
         ]);
     }
 
+   public function promote_artists_track(Request $request){
 
+        $request->validate([
+            'ref' => "required|string"
+        ]);
+
+        $response = PaystackController::verify($request->ref);
+
+        if ($response['status']) {
+            $data = $response['data'];
+            if ($data['status'] === 'success') {
+                $payment = Payment::find('transaction_id',$data['id']);
+                if (!$payment) {
+                    $amount = $data['amount'] / 100;
+                    $user = auth()->user();
+
+                    $user->payments()->create([
+                        'radio_stations_id' => $data['radio_stations_id'],
+                        'media_id' => $data['media_id'],
+                        'transaction_id' => $data['id'],
+                        'reference' => $data['reference'],
+                        'amount' => $amount,
+                        'currency' => $data['currency'],
+                        'status' => 'SUCCESS',
+                    ]);
+                     $m = Media::find($data['media_id']);
+                     $radio = Radio::find($data['radio_stations_id']);
+                     $m->assigned_radioStation()->attach($radio);
+                     $m->status = 'pending';
+                     $m->save();
+
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Payment for Track promotion made successfully'
+                    ]);
+                }
+
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Duplicate Transaction'
+                ], 403);
+            } else {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Transaction failed'
+                ], 403);
+            }
+        } else {
+            return response()->json($response, 403);
+        }
+   }
 
     public function myPlayList()
     {
@@ -229,23 +281,31 @@ class MediaController extends Controller
       $media = Media::find($id);
       $media->status = 'promoting';
       $media->save();
+     return new MediaResource($media);
     }
     public function reject_track($id)
     {
         $media = Media::find($id);
         $media->status = 'rejected';
         $media->save();
-
+        return new MediaResource($media);
     }
-    public function promote_track($id)
+    public function promoted_track($id)
     {
         $media = Media::find($id);
         $media->status = 'promoted';
         $media->save();
+        return new MediaResource($media);
     }
     public function promoted_tracks(){
         $media = Media::where('status','promoted')->latest()->get();
         return MediaResource::collection($media);
 
     }
+    public function radio_station_playList(){
+        $user = auth()->user();
+        $radio = Radio::where('user_id',$user->id)->first();
+        return MediaResource::collection($radio->assigned_tracks());
+    }
+
 }

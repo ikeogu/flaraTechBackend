@@ -127,5 +127,9 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail, CanRe
     {
         return $this->hasMany(Media::class, 'user_id');
     }
+     public function payments()
+    {
+        return $this->hasMany(Payment::class, 'user_id');
+    }
 
 }

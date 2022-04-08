@@ -28,6 +28,7 @@ class MediaResource extends JsonResource
                 $this->is_promoted,
                 $is_promoted
             ),
+            'status'=> $this->status,
             'description' => $this->description,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
@@ -40,7 +41,7 @@ class MediaResource extends JsonResource
             ]);
         } elseif ($this->type === 'track') {
             array_merge($data, [
-                'track' => new TrackResource($this->track)
+                'track' => new TrackResource($this->tracks)
             ]);
         }
         return $data;

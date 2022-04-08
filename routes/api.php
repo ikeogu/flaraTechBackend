@@ -83,6 +83,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
             // Profile Routes
             Route::get('/profile', 'Auth\AuthController@profile');
             Route::post('/profile_update', 'User\UserController@update_user');
+             Route::post('/update_artist_radio/{id}', 'User\UserController@update_artist_radio');
             Route::get('list_of_radio_stations', 'User\UserController@list_of_radio_stations');
             Route::get('list_of_artists', 'User\UserController@list_of_artists');
             Route::post('logout', 'Auth\AuthController@logout');
@@ -109,14 +110,17 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
                 // Route::get('{type}', 'MediaController@get_all_media');
                 Route::post('upload_media', 'MediaController@upload_media');
                 Route::get('artiste_track_list', 'MediaController@myPlayList');
+                Route::get('radio_station_playList', 'MediaController@radio_station_playList');
                 Route::post('{media}/download/{media_id}', 'MediaController@download_media');
                 Route::post('{media}/update', 'MediaController@update_media');
                 Route::post('delete', 'MediaController@delete_media');
                 Route::get('get_all_track', 'MediaController@get_all_media');
-                Route::get('promoting_track/{id}','MediaController@accept_track');
+                Route::get('accept_track/{id}','MediaController@accept_track');
                 Route::get('reject_track/{id}', 'MediaController@reject_track');
-                Route::get('promote_track/{id}', 'MediaController@promote_track');
+                Route::get('promoted_track/{id}', 'MediaController@promoted_track');
                 Route::get('promoted_tracks', 'MediaController@promoted_tracks');
+                Route::post('promote_artists_track', 'MediaController@promote_artists_track');
+
 
                 Route::group(['prefix' => 'trash'], function () {
                     Route::get('{type}', 'MediaController@get_all_trash');

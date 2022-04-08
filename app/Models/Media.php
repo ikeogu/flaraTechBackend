@@ -27,14 +27,11 @@ class Media extends Model
         return $this->hasMany(Track::class, 'media_id');
     }
 
-    public function account()
+    public function assigned_radioStation()
     {
-        return $this->belongsTo(Account::class, 'account_id');
+        return $this->belongsToMany(Radio::class);
     }
 
-    public function income()
-    {
-        return $this->morphMany(Payment::class, 'payable');
-    }
+
 
 }

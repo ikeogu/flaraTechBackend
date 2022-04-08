@@ -86,6 +86,73 @@ class UserController extends Controller
 
 
     }
+    public function update_artist_radio(Request $request,$id)
+    {
+        $user = User::find($id);
+
+
+        $request->validate([
+            'name'=> 'filled|string',
+            'record_label' => 'filled|string',
+            'stage_name' => 'filled|string',
+            'twitter_handle' => 'filled|string',
+            'instagram' => 'filled|string',
+            'phone_number'=> 'filled|string',
+            'image' => 'filled|image',
+            // 'password' => 'filled|string|min:8|confirmed',
+        ]);
+
+        if ($request->has('email') && $request->email !== $user->email) {
+            $user->update([
+                'email' => $request->email,
+                'email_verified_at' => null
+            ]);
+            $user->fresh()->sendEmailVerificationNotification();
+        }
+        if ($request->hasFile('image')) {
+            $filename = $request->image->getClientOriginalName();
+            $request->image->storeAs('images', $filename, 'public');
+             $user->role_id == 2 ?Profile::whereId('user_id',$user->id)->update(['image' => $filename]): Radio::whereId('user_id', $user->id)->update(['logo' => $filename]);
+        }
+       if ($user->role_id ==3){
+          $r = Radio::where('user_id', $user->id)->first();
+          $r->price = $request->price;
+          $r->acct_bal = $request->acct_bal;
+          $r->state = $request->state;
+          $r->save();
+            $user->status = true;
+            $user->name = $request->name;
+            $user->save();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Profile updated successfully',
+                'data' => new RadioResource($r)
+            ]);
+
+       }else{
+            $pro = Profile::where('user_id', $user->id)->first();
+            $pro->record_label = $request->record_label;
+            $pro->stage_name = $request->stage_name;
+            $pro->twitter_handle = $request->twitter_handle;
+            $pro->instagram = $request->instagram;
+            $pro->phone_number = $request->phone_number;
+            $pro->account_name = $request->account_name;
+            $pro->account_number = $request->account_number;
+            $pro->bank = $request->bank;
+
+            $user->status = true;
+            $user->name = $request->name;
+            $user->save();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Profile updated successfully',
+                'data' => new ProfileResource($pro)
+            ]);
+       }
+
+
+
+    }
     public function Dashboard(){
        $user = auth()->user();
        if($user->role_id ==1 ){

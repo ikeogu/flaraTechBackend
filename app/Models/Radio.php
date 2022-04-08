@@ -9,7 +9,7 @@ class Radio extends Model
 {
     use HasFactory;
     protected $fillable = [
-    
+
         'logo',
         'price',
         'state',
@@ -20,5 +20,9 @@ class Radio extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function assigned_tracks()
+    {
+        return $this->belongsToMany(Media::class);
     }
 }

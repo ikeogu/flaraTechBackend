@@ -13,15 +13,15 @@ class CreateRadiosTable extends Migration
      */
     public function up()
     {
-        Schema::create('radios', function (Blueprint $table) {
-            $table->id();
-            $table->string('logo');
-            $table->double('price');
-            $table->string('frequency');
-            $table->double('acct_bal');
-            $table->integer('user_id');
-            $table->timestamps();
-        });
+        // Schema::create('radios', function (Blueprint $table) {
+        //     // $table->id();
+        //     // $table->string('logo');
+        //     // $table->double('price');
+        //     // $table->string('frequency');
+        //     // $table->double('acct_bal');
+        //     // $table->integer('user_id');
+        //     // $table->timestamps();
+        // });
     }
 
     /**

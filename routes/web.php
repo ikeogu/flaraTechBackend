@@ -21,4 +21,8 @@ Route::get('/', function () {
 Route::get('hello',function(){
     return 'hello';
 });
+Route::get('/command',function(){
+    // Artisan::call('storage:link');
+
+  });
 
