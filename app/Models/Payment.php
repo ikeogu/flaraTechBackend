@@ -16,6 +16,7 @@ class Payment extends Model
         'reference',
         'status',
         'transaction_id',
-        
+        'summed'
+
     ];
 }

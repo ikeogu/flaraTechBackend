@@ -226,31 +226,36 @@ class MediaController extends Controller
         $request->validate([
             'ref' => "required|string"
         ]);
+        // dd($request->all());
 
         $response = PaystackController::verify($request->ref);
 
         if ($response['status']) {
             $data = $response['data'];
+            
             if ($data['status'] === 'success') {
-                $payment = Payment::find('transaction_id',$data['id']);
+                $payment = Payment::where('transaction_id',$data['id'])->first();
                 if (!$payment) {
                     $amount = $data['amount'] / 100;
                     $user = auth()->user();
-
-                    $user->payments()->create([
-                        'radio_stations_id' => $data['radio_stations_id'],
-                        'media_id' => $data['media_id'],
-                        'transaction_id' => $data['id'],
-                        'reference' => $data['reference'],
-                        'amount' => $amount,
-                        'currency' => $data['currency'],
-                        'status' => 'SUCCESS',
-                    ]);
-                     $m = Media::find($data['media_id']);
-                     $radio = Radio::find($data['radio_stations_id']);
+                    $payment = new Payment();
+                    $payment->radio_stations_id  = json_encode($request->radio_stations_id);
+                    $payment->media_id  = $request->media_id;
+                    $payment->transaction_id = $data['id'];
+                    $payment->reference  = $data['reference'];
+                    $payment->amount  = $amount;
+                    $payment->currency = $data['currency'];
+                    $payment->status = 'SUCCESS';
+                    $payment->user_id =$user->id;
+                    if($payment->save()){
+                     $m = Media::find($request->media_id);
+                     $radio = Radio::find($request->radio_stations_id);
                      $m->assigned_radioStation()->attach($radio);
-                     $m->status = 'pending';
+                     $m->price += $amount;
+                     $m->status = 'paid';
                      $m->save();
+                    }
+                   
 
                     return response()->json([
                         'status' => 'success',
@@ -305,7 +310,8 @@ class MediaController extends Controller
     public function radio_station_playList(){
         $user = auth()->user();
         $radio = Radio::where('user_id',$user->id)->first();
-        return MediaResource::collection($radio->assigned_tracks());
+        // dd($radio->assigned_tracks);
+        return $radio ? MediaResource::collection($radio->assigned_tracks) :'Not a radio account';
     }
 
 }

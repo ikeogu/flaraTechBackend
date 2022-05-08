@@ -23,6 +23,10 @@ class Radio extends Model
     }
     public function assigned_tracks()
     {
-        return $this->belongsToMany(Media::class);
+        return $this->belongsToMany(Media::class,'media_radio', 'radio_id','media_id');
+    }
+
+    public function reconcilation(){
+        return $this->hasMany(Reconcilation::class, 'radio_id');
     }
 }

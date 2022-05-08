@@ -2,3 +2,11 @@
 Stack trace:
 #0 {main}
   thrown in /home/appgidic/public_html/flaretech/flaretechbackend/public/symlink.php on line 8
+[12-Apr-2022 02:44:06 Africa/Lagos] PHP Fatal error:  Uncaught Error: Class "Artisan" not found in /home/appgidic/public_html/flaretech/flaretechbackend/public/symlink.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/appgidic/public_html/flaretech/flaretechbackend/public/symlink.php on line 15
+[12-Apr-2022 02:44:57 Africa/Lagos] PHP Fatal error:  Uncaught Error: Class "Artisan" not found in /home/appgidic/public_html/flaretech/flaretechbackend/public/symlink.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/appgidic/public_html/flaretech/flaretechbackend/public/symlink.php on line 15

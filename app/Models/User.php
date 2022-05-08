@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
 
-class User extends Authenticatable implements JWTSubject, MustVerifyEmail, CanResetPassword
+class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
     use HasFactory, Notifiable, \Illuminate\Auth\Passwords\CanResetPassword;
 
@@ -86,9 +86,10 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail, CanRe
             );
 
         $n = \config('app.url') . '/api/management';
-        $m = \config('app.frontend_url') . '/auth';
-
-            return Str::replaceFirst($n, $m, $url);
+        $m = \config('app.frontend_url') . '/auth/passwords/enter-code';
+        
+            $test= Str::replaceFirst($n, $m, $url);
+            dd($test);
         });
         $this->notify(new VerifyEmail());
     }

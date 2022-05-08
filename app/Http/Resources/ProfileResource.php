@@ -26,7 +26,8 @@ class ProfileResource extends JsonResource
             'account_name'=>$this->account_name,
             'bank'=>$this->bank,
             'status' => $this->user->status,
-
+            'facebook_handle'=> $this->facebook,
+            'bio' => $this->bio
 
         ];
     }

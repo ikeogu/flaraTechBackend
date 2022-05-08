@@ -29,7 +29,7 @@ class Media extends Model
 
     public function assigned_radioStation()
     {
-        return $this->belongsToMany(Radio::class);
+        return $this->belongsToMany(Radio::class,'media_radio','media_id','radio_id');
     }
 
 

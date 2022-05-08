@@ -53,7 +53,7 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
-    'frontend_url' => env('FRONTEND_URL', 'https://www.churchvest.com'),
+    'frontend_url' => env('FRONTEND_URL', 'https://craxet.com/flaretech'),
 
     'asset_url' => env('ASSET_URL', null),
 

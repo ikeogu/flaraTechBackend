@@ -52,12 +52,13 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::post('reset-password', function (Request $request) {
             $request->validate([
                 'token' => 'required',
-                'email' => 'required|email',
                 'password' => 'required|min:8|confirmed',
             ]);
 
+
+
             $status = Password::reset(
-                $request->only('email', 'password', 'password_confirmation', 'token'),
+                $request->only('password', 'password_confirmation', 'token'),
                 function ($user, $password) use ($request) {
                     $user->forceFill([
                         'password' => Hash::make($password)
@@ -129,8 +130,29 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
                     Route::post('delete', 'MediaController@delete_trash');
                 });
             });
+                // Revenue endpoints
+            Route::group(['prefix' => 'revenue', 'namespace' => 'Revenue',], function () {
+                Route::get('all_reconcilation', 'ReconcilationController@index');
+                Route::post('add_radio_reconcilation', 'ReconcilationController@store');
+                Route::post('update_reconcilation/{id}', 'ReconcilationController@update');
+                Route::get('del_reconcilation/{id}', 'ReconcilationController@destroy');
+                Route::get('approve_reconcilation/{id}', 'ReconcilationController@approveRecon');
+                Route::get('allSharingFormular', 'ReconcilationController@allSharingFormular');
+                Route::post('sharingFormular', 'ReconcilationController@sharingFormular');
+                Route::post('updateFormular/{id}', 'ReconcilationController@updateFormular');
+                Route::post('updateFormular/{id}', 'ReconcilationController@updateFormular');
+
+            });
+            Route::group(['prefix' => 'faq', 'namespace' => 'FAQ',], function () {
+                Route::get('all_faqs', 'FAQController@index');
+                Route::post('add_faq', 'FAQController@store');
+                Route::post('update_faq/{id}', 'FAQController@update');
+            });
             // Dashboard routes
             Route::get('dashboard', 'User\UserController@Dashboard');
+            Route::get('report', 'GeneralController@revenue');
+
+            // revenue route
             // payment routes
             // Laravel 8
             Route::post('/pay', [App\Http\Controllers\PaymentController::class, 'redirectToGateway'])->name('pay');

@@ -15,6 +15,7 @@ class TrackList extends JsonResource
     public function toArray($request)
     {
         return [
+            'id'=> $this->id,
             'type' => $this->type,
             'title' => $this->title,
             'price' => $request->price ?: 0,

@@ -15,9 +15,9 @@ class TrackResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id',
-            'duration' => $this->duration,
-            'path'=> $this->path
+            'id' => $this->id ?? '',
+            'duration' => $this->duration ?? '',
+            'path'=> $this->path ?? ''
         ];
 
     }

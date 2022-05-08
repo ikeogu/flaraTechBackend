@@ -35,13 +35,13 @@ class UserController extends Controller
             // 'password' => 'filled|string|min:8|confirmed',
         ]);
 
-        if ($request->has('email') && $request->email !== $user->email) {
-            $user->update([
-                'email' => $request->email,
-                'email_verified_at' => null
-            ]);
-            $user->fresh()->sendEmailVerificationNotification();
-        }
+        // if ($request->has('email') && $request->email !== $user->email) {
+        //     $user->update([
+        //         'email' => $request->email,
+        //         'email_verified_at' => null
+        //     ]);
+        //     $user->fresh()->sendEmailVerificationNotification();
+        // }
         if ($request->hasFile('image')) {
             $filename = $request->image->getClientOriginalName();
             $request->image->storeAs('images', $filename, 'public');
@@ -54,7 +54,7 @@ class UserController extends Controller
           $r->state = $request->state;
           $r->save();
             $user->status = true;
-            $user->name = $request->name;
+            $user->name = $request->first_name .' '.$request->last_name;
             $user->save();
             return response()->json([
                 'status' => 'success',
@@ -67,6 +67,7 @@ class UserController extends Controller
             $pro->record_label = $request->record_label;
             $pro->stage_name = $request->stage_name;
             $pro->twitter_handle = $request->twitter_handle;
+            $pro->facebook = $request->facebook_handle;
             $pro->instagram = $request->instagram;
             $pro->phone_number = $request->phone_number;
             $pro->account_name = $request->account_name;
@@ -74,8 +75,9 @@ class UserController extends Controller
             $pro->bank = $request->bank;
 
             $user->status = true;
-            $user->name = $request->name;
+            $user->name = $request->first_name .' '.$request->last_name;
             $user->save();
+            $pro->save();
             return response()->json([
                 'status' => 'success',
                 'message' => 'Profile updated successfully',
@@ -121,7 +123,7 @@ class UserController extends Controller
           $r->state = $request->state;
           $r->save();
             $user->status = true;
-            $user->name = $request->name;
+            $user->name = $request->first_name .' '.$request->last_name;
             $user->save();
             return response()->json([
                 'status' => 'success',
@@ -139,9 +141,10 @@ class UserController extends Controller
             $pro->account_name = $request->account_name;
             $pro->account_number = $request->account_number;
             $pro->bank = $request->bank;
+            $pro->bio = $request->bio;
 
             $user->status = true;
-            $user->name = $request->name;
+            $user->name = $request->first_name . ' ' . $request->last_name;;
             $user->save();
             return response()->json([
                 'status' => 'success',

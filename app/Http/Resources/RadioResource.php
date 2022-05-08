@@ -17,9 +17,10 @@ class RadioResource extends JsonResource
     {
         return [
             'id'=> $this->id,
-            'name'=> $this->name,
+            'name'=> $this->name .' '. $this->frequency ,
             'email' => $this->email,
             'status' => $this->status,
+            'price'=>$this->price,
             'profile'=> $this->radio_details,
             'total_songs_approved' => Media::where('status','=','promoting')->count(),
             'total_songs_rejected' => Media::where('status', '=', 'rejected')->count(),
