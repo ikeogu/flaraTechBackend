@@ -14,10 +14,10 @@ class CreateReconcilationsTable extends Migration
     public function up()
     {
         Schema::create('reconcilations', function (Blueprint $table) {
-    
+
             $table->id();
             $table->integer('radio_id');
-            $table->interger('amount');
+            $table->integer('amount');
             $table->boolean('status');
             $table->integer('paid_by');
             $table->mediumText('description');

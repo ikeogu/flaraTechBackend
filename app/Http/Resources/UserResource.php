@@ -15,20 +15,25 @@ class UserResource extends JsonResource
      */
     public function toArray($request)
     {   $names = explode(" ", $this->name);
-        return [
+       
+         return [
             'id' => $this->id,
             'first_name' => $names[0],
             'last_name' => $names[1] ?? "",
             'middle_name' => implode(" ", array_slice($names, 2)) ?? "",
             'email' => $this->email,
             'email_verified_at' => $this->email_verified_at,
-
              'role_id' =>$this->role_id,
              'status'=>$this->status,
+           
             'details' => [
-                'personal' => $this->personal_details ? new ProfileResource($this->personal_details) : (object)[],
+                 'personal' => $this->personal_details ? new ProfileResource($this->personal_details) : (object)[],
+             
+                'radio_details' => $this->radio_details ? new RadioResource($this->radio_details) :(object)[]
             ],
 
-        ];
+         ];
+        
+     
     }
 }

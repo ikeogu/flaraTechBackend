@@ -54,9 +54,11 @@ class FAQController extends Controller
      * @param  \App\Models\FAQ  $fAQ
      * @return \Illuminate\Http\Response
      */
-    public function show(FAQ $fAQ)
+    public function show($fAQ)
     {
         //
+        $faq = FAQ::find($fAQ);
+         return new FAQResource($faq);
     }
 
     /**
@@ -80,7 +82,10 @@ class FAQController extends Controller
     public function update(Request $request, $fAQ)
     {
         //
-      $faq =  FAQ::whereId($fAQ)->update($request->except(['_token','id']));
+      $faq =  FAQ::find($fAQ);
+      $faq->question = $request->question;
+      $faq->answer = $request->answer;
+      $faq->save();
         return new FAQResource($faq);
     }
 

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Management\Media;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\PaystackController;
 use App\Http\Resources\MediaResource;
+use App\Http\Resources\MusicStatus;
+use App\Http\Resources\RadioResource;
 use App\Http\Resources\TrackList;
 use App\Models\Church;
 use App\Models\Media;
@@ -17,6 +19,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use wapmorgan\Mp3Info\Mp3Info;
+use Illuminate\Support\Facades\File;
+use DB;
 
 class MediaController extends Controller
 {
@@ -72,7 +76,7 @@ class MediaController extends Controller
             'owner_name' => $user->name,
             'price' => $request->price ?: 0,
             'description' => $request->description,
-            'status' => 'pending'
+            'status' => 'not promoted'
         ]);
 
 
@@ -80,6 +84,7 @@ class MediaController extends Controller
                 $file = $request->file('track');
                 $file_name = Str::slug($media->title) . '.mp3';
                 $path = 'flaretech_uploads/uploads/media/' . $media->type;
+                File::isDirectory($path) or File::makeDirectory($path, 0777, true, true);
                 static::add_track_to_media($media, $file, $file_name, $path);
                 $media->load('track');
             }
@@ -131,18 +136,18 @@ class MediaController extends Controller
     public function delete_media(Request $request)
     {
         $user = auth()->user();
-        $request->validate([
-            'media_id' => [
-                'required',
-                'array',
-                'min:1'
+        // $request->validate([
+        //     'media_id' => [
+        //         'required',
+        //         'array',
+        //         'min:1'
 
-            ],
-            'media_id.*' => [
-                'integer',
-                Rule::exists('media', 'id')->where('user_id', $user->id)
-            ]
-        ]);
+        //     ],
+        //     'media_id.*' => [
+        //         'integer',
+        //         Rule::exists('media', 'id')->where('user_id', $user->id)
+        //     ]
+        // ]);
 
         $user->media()->whereIn('id', $request->media_id)->delete();
 
@@ -232,7 +237,7 @@ class MediaController extends Controller
 
         if ($response['status']) {
             $data = $response['data'];
-            
+
             if ($data['status'] === 'success') {
                 $payment = Payment::where('transaction_id',$data['id'])->first();
                 if (!$payment) {
@@ -255,7 +260,7 @@ class MediaController extends Controller
                      $m->status = 'paid';
                      $m->save();
                     }
-                   
+
 
                     return response()->json([
                         'status' => 'success',
@@ -282,10 +287,15 @@ class MediaController extends Controller
     {
         return TrackList::collection(auth()->user()->media);
     }
-    public function accept_track($id){
+   public function accept_track($id){
       $media = Media::find($id);
       $media->status = 'promoting';
       $media->save();
+      DB::table('media_radio')->insert([
+          'media_id' => $id,
+          'radio_id' => auth()->user()->radio_details->id,
+          'status' => 'promoting'
+        ]);
      return new MediaResource($media);
     }
     public function reject_track($id)
@@ -293,6 +303,11 @@ class MediaController extends Controller
         $media = Media::find($id);
         $media->status = 'rejected';
         $media->save();
+        DB::table('media_radio')->insert([
+            'media_id' => $id,
+            'radio_id' => auth()->user()->radio_details->id,
+            'status' => 'rejected'
+        ]);
         return new MediaResource($media);
     }
     public function promoted_track($id)
@@ -300,13 +315,22 @@ class MediaController extends Controller
         $media = Media::find($id);
         $media->status = 'promoted';
         $media->save();
+        DB::table('media_radio')->where('media_id', $id)->where('radio_id',auth()->user()->radio_details->id)->update(['status' => 'promoted']);
         return new MediaResource($media);
     }
     public function promoted_tracks(){
-        $media = Media::where('status','promoted')->latest()->get();
+        $media =  DB::table('media_radio')->where('status','promoted')->latest()->get();
+        $media = Media::whereIn('id',$media->pluck('media_id'))->get();
         return MediaResource::collection($media);
-
     }
+
+    public function rejected_tracks()
+    {
+        $media =  DB::table('media_radio')->where('status', 'rejected')->latest()->get();
+        $media = Media::whereIn('id', $media->pluck('media_id'))->get();
+        return MediaResource::collection($media);
+    }
+
     public function radio_station_playList(){
         $user = auth()->user();
         $radio = Radio::where('user_id',$user->id)->first();
@@ -314,4 +338,9 @@ class MediaController extends Controller
         return $radio ? MediaResource::collection($radio->assigned_tracks) :'Not a radio account';
     }
 
+    public function getTrackRadioStation($id){
+
+        $radio = DB::table('media_radio')->where('media_id',$id)->get();
+        return MusicStatus::collection($radio);
+    }
 }

@@ -84,6 +84,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
             // Profile Routes
             Route::get('/profile', 'Auth\AuthController@profile');
             Route::post('/profile_update', 'User\UserController@update_user');
+            Route::post('updateprice', 'User\UserController@updatePrice');
              Route::post('/update_artist_radio/{id}', 'User\UserController@update_artist_radio');
             Route::get('list_of_radio_stations', 'User\UserController@list_of_radio_stations');
             Route::get('list_of_artists', 'User\UserController@list_of_artists');
@@ -129,6 +130,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
                     Route::post('restore', 'MediaController@restore_trash');
                     Route::post('delete', 'MediaController@delete_trash');
                 });
+                // Shedule music
+                Route::get('scheduled_music', 'MusicShedularController@index');
+                Route::post('schedule_music', 'MusicShedularController@store');
+                Route::post('scheduled_music/{id}', 'MusicShedularController@update');
+                Route::post('scheduled_music/delete/{id}', 'MusicShedularController@destroy');
+                Route::get('get_scheduled_music_by_radio', 'MusicShedularController@getMusicShedularByRadioId');
+                Route::get('get_scheduled_music_by_media_id/{id}', 'MusicShedularController@getMusicShedularByMediaId');
+                Route::get('radio_station_media_status/{id}', 'MediaController@getTrackRadioStation');
+
             });
                 // Revenue endpoints
             Route::group(['prefix' => 'revenue', 'namespace' => 'Revenue',], function () {
@@ -141,16 +151,23 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
                 Route::post('sharingFormular', 'ReconcilationController@sharingFormular');
                 Route::post('updateFormular/{id}', 'ReconcilationController@updateFormular');
                 Route::post('updateFormular/{id}', 'ReconcilationController@updateFormular');
+                Route::get('get_reconcilation_by_radio', 'ReconcilationController@getReconcilationByRadio');
+                Route::get('showsharing/{id}', 'ReconcilationController@showsharing');
+               
+                  Route::get('showrecon/{id}', 'ReconcilationController@show');
 
             });
             Route::group(['prefix' => 'faq', 'namespace' => 'FAQ',], function () {
                 Route::get('all_faqs', 'FAQController@index');
+                 Route::get('show_faq/{id}', 'FAQController@show');
                 Route::post('add_faq', 'FAQController@store');
                 Route::post('update_faq/{id}', 'FAQController@update');
             });
             // Dashboard routes
             Route::get('dashboard', 'User\UserController@Dashboard');
             Route::get('report', 'GeneralController@revenue');
+             Route::get('revenue/show_radio_revenue', 'GeneralController@radio_revenue');
+
 
             // revenue route
             // payment routes

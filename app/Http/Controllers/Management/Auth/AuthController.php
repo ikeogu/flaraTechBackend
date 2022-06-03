@@ -26,6 +26,7 @@ class AuthController extends Controller
     }
     public function registerRadio(Request $request)
     {
+       
         return $this->register($request, 3);
     }
     public function register($request, $role_id)
@@ -47,13 +48,13 @@ class AuthController extends Controller
         if ($role_id == 3) {
             Radio::updateOrCreate([
                 'user_id' => $user->id,
-                'name' => $request->name,
-            ]);
-        } else {
+                'acct_bal'=> 0
+               ]);
+        }
             Profile::updateOrCreate([
                 'user_id' => $user->id
             ]);
-        }
+        
 
 
         $token = auth()->login($user);
@@ -92,7 +93,9 @@ class AuthController extends Controller
 
     public function profile()
     {
+        
         return new UserResource(auth()->user());
+        
     }
     public function logout()
     {
@@ -145,5 +148,14 @@ class AuthController extends Controller
         event(new Registered($user));
 
         return $this->respondWithToken($token);
+    }
+    
+    public function updatePrice(Request $request){
+        $r = Radio::where('user_id',auth()->user()->id)->first();
+        $r->prrice = $request->price;
+        $r->frequency =$request->frequency;
+        
+        $r->save();
+        return response()->json(['msg'=> " Updated"]);
     }
 }

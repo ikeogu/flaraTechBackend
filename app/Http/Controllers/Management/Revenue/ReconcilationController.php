@@ -21,7 +21,7 @@ class ReconcilationController extends Controller
     public function index()
     {
         //
-        $recons = Reconcilation::latest()->get();
+        $recons = Reconcilation::latest()->paginate(100);
         return ReconcilationResource::collection($recons);
     }
 
@@ -44,17 +44,27 @@ class ReconcilationController extends Controller
     public function store(Request $request)
     {
         //
-        $purse = Purse::latest()->first();
+        
         $recon = new Reconcilation();
         $recon->amount = $request->amount;
         $recon->radio_id = $request->radio_id;
+        $recon->media_id = $request->media_id;
         $recon->paid_by = auth()->user()->id;
         $recon->description = $request->description;
-        $recon->staus = false;
-        if($recon->save()){
-            $purse->account_balance -= $recon->amount;
-            $purse->save();
-        }
+        $recon->status = false;
+        if ($request->hasFile('image_prove')) {
+                $file = $request->file('image_prove');
+                $file_name = "Payment_prove".date('YmdHi').$file->getClientOriginalName();
+                $path = 'flaretech_uploads/uploads/payment_proves/'.$file_name;
+                File::isDirectory($path) or File::makeDirectory($path, 0777, true, true);
+                $file->move($path, $file_name);
+                $recon->image_prove;
+               
+            }
+         
+        $recon->save();
+            
+        
         return new ReconcilationResource($recon);
     }
 
@@ -64,9 +74,12 @@ class ReconcilationController extends Controller
      * @param  \App\Models\Reconcilation  $reconcilation
      * @return \Illuminate\Http\Response
      */
-    public function show(Reconcilation $reconcilation)
+    public function show($reconcilation)
     {
         //
+        $r = Reconcilation::find($reconcilation);
+        
+         return new ReconcilationResource($r);
     }
 
     /**
@@ -90,8 +103,24 @@ class ReconcilationController extends Controller
     public function update(Request $request,  $reconcilation)
     {
         //
-        Reconcilation::whereId($reconcilation)->update($request->except(['_token','id']));
-        return response()->json(['msg'=>'Updated successfully']);
+       $r = Reconcilation::find($reconcilation);
+       $r->amount =  $request->amount;
+       $r->radio_id = $request->radio_id;
+       $r->media_id = $request->media_id;
+       $r->description = $request->description;
+     
+        if ($request->hasFile('image_prove')) {
+                $file = $request->file('image_prove');
+                $file_name = "Payment_prove".date('YmdHi').$file->getClientOriginalName();
+                $path = 'flaretech_uploads/uploads/payment_proves/'.$file_name;
+                File::isDirectory($path) or File::makeDirectory($path, 0777, true, true);
+                $file->move($path, $file_name);
+                $r->image_prove = $path;
+               
+            }
+       
+        $r->save();
+       
     }
 
     /**
@@ -105,24 +134,39 @@ class ReconcilationController extends Controller
         //
         $r = Reconcilation::find($reconcilation);
         $r->delete();
-        return;
+        return response()->json([
+            'status'=>'deleted'
+            ]);
     }
 
     public function approveRecon($id){
         $recon = Reconcilation::find($id);
-        if($recon->staus != true){
+        if($recon->status != true){
             $recon->status = true;
+            $recon->updated_at = date('Y-m-d');
 
             if ($recon->save()) {
+                $purse = Purse::latest()->first();
                 $radio = Radio::where('user_id', auth()->user()->id)->first();
                 $radio->acct_bal += $recon->amount;
-
+                
+                $purse->account_balance -= $recon->amount;
+                $purse->save();
+                DB::table('radio_paid')->insert([
+                    'balance'=> $purse->account_balance -= $recon->amount,
+                    'radio_id'=>$radio->id,
+                    'amount_paid' => $recon->amount,
+                    'created_at'=> date('Y-m-d H:i:s'),
+                    'updated_at'=>  date('Y-m-d H:i:s')
+                ]);
             }
         }
 
     }
+    
+    
     public function allSharingFormular(){
-        $shares = SharingFormular::all();
+        $shares = SharingFormular::latest()->get();
         return SharingResource::collection($shares);
     }
     public function sharingFormular(Request $request){
@@ -141,6 +185,15 @@ class ReconcilationController extends Controller
         $share->bio = $request->bio;
         $share->save();
         return new SharingResource($share);
+    }
+    public function showsharing($id){
+        $share = SharingFormular::find($id);
+          return new SharingResource($share);
+    }
+      public function getReconcilationByRadio(){
+        $radio = Radio::where('user_id', auth()->user()->id)->first();
+        $recons = Reconcilation::where('radio_id',$radio->id)->get();
+        return ReconcilationResource::collection($recons);
     }
 }
 

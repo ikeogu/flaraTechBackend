@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Media;
+use App\Models\User;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class RadioResource extends JsonResource
@@ -16,12 +17,12 @@ class RadioResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'=> $this->id,
-            'name'=> $this->name .' '. $this->frequency ,
-            'email' => $this->email,
+            'radio_id'=> $this->id,
+            'name'=> $this->user->name,
+            'email'=>$this->user->email,
+           
             'status' => $this->status,
-            'price'=>$this->price,
-            'profile'=> $this->radio_details,
+            'profile'=> $this->user->radio_details,
             'total_songs_approved' => Media::where('status','=','promoting')->count(),
             'total_songs_rejected' => Media::where('status', '=', 'rejected')->count(),
             'total_songs_promoted' => Media::where('status', '=', 'promoted')->count(),

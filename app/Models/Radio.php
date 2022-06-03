@@ -29,4 +29,8 @@ class Radio extends Model
     public function reconcilation(){
         return $this->hasMany(Reconcilation::class, 'radio_id');
     }
+    
+    public function share_formular(){
+        return $this->hasOne(SharingFormular::class);
+    }
 }

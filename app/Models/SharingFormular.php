@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class SharingFormular extends Model
 {
     use HasFactory;
+    
+    public function radio(){
+        return $this->belongsTo(Radio::class);
+    }
 }

@@ -15,12 +15,7 @@ class MediaResource extends JsonResource
     public function toArray($request)
     {
         $is_promoted = false;
-        // if ($this->price) {
-        //     $church = Church::get_church($request->route('church_slug'));
-        //     $member = $church->members()->where('user_id', auth()->user()->id)->firstOrFail();
-        //     $is_purchased = (bool)$this->income()->where('payer_type', Member::class)->where('payer_id', $member->id)->count();
-        // }
-        // dd($this->assigned_radioStation);
+         
         $data = [
             'id' => $this->id,
             'type' => $this->type,
@@ -31,8 +26,8 @@ class MediaResource extends JsonResource
             ),
             'price'=>$this->price,
             'status'=> $this->status,
-            'track' => new TrackResource($this->tracks),
-            'radio_stations_assigned to' => RadioResource::collection($this->assigned_radioStation),
+            'track' =>  TrackResource::collection($this->tracks),
+            'radio_stations_assigned_to' => RadioResource::collection($this->assigned_radioStation),
             'description' => $this->description,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
